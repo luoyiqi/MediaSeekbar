@@ -255,10 +255,11 @@ public class MediaSeekBar extends View {
 
     private boolean isPressThumb(float x, float y) {
 
-        int left = thumbPos - thumb.getWidth() / 2;
-        int top = (height-thumb.getHeight()) / 2;
-        int right = left + thumb.getWidth();
-        int bottom = top + thumb.getHeight();
+        //expand touch range of thumb
+        int left = thumbPos - thumb.getWidth();
+        int top = 0;
+        int right = thumbPos + thumb.getWidth();
+        int bottom = height;
 
         RectF thumbRect = new RectF(left,top, right, bottom);
 
