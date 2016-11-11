@@ -21,40 +21,42 @@ import android.view.View;
  */
 public class MediaSeekBar extends View {
 
-
     private Context context;
     private MediaSeekBarListener listener;
 
     int maxProgress;
     int hasBufferProgress;
-    int currentProgress;
+    int currentProgress = 0;
 
     int width;
     int height;
-    private int centerY;
+    private int centerY; // MediaSeekBar height's half
     private Bitmap thumb;
-    private int thumbPos;
+    private float thumbPos;  // thumb's center point (center x)
     private final int DEFAULT_SIZE = 100;
-
-
+    private float halfThumbWidth;
 
     private Paint paint;
     private int hasPlayColor;
     private int originBackgroundColor;
     private int hasBufferColor;
-    private int progressWidth;
+    private int progressLineWidth;
 
     float x;
     float y;
+    float preDragX;
+    private static final float CALL_DRAGGING_FREQUENCY = 80;
     private int currentTouchState = NO_TOUCH;
     private static final int NO_TOUCH = 1;
     private static final int CLICK_THUMB = 2;
-    private static final int START_DRAW_THUMB = 3;
-    private static final int STOP_DRAW_THUMB = 4;
-    private static final int CLICK_PROGRESS = 5;
+    private static final int START_DRAG_THUMB = 3;
+    private static final int DRAGGING_THUMB = 4;
+    private static final int STOP_DRAG_THUMB = 5;
+    private static final int CLICK_PROGRESS = 6;
     private boolean isStartDrawThumb = false;
     private int PROGRESS_CLICK_RANGE = 10;
     private boolean canClickProgress = false;
+
 
 
 
@@ -82,14 +84,13 @@ public class MediaSeekBar extends View {
         initPaint();
     }
 
-
     private void initDefaultStyle() {
         Resources resources = context.getResources();
         hasPlayColor = resources.getColor(R.color.has_play_color);
         originBackgroundColor = resources.getColor(R.color.origin_background_color);
         hasBufferColor = resources.getColor(R.color.has_buffer_color);
         maxProgress = 100;
-        progressWidth = dpToPx(2);
+        progressLineWidth = dpToPx(2);
         thumb = (new XhsMediaPlayerThumb( dpToPx(30), dpToPx(30) , context)).getBitmap();
     }
 
@@ -101,14 +102,13 @@ public class MediaSeekBar extends View {
             hasPlayColor = ta.getColor(R.styleable.MediaSeekBar_hasPlayColor, hasPlayColor);
             originBackgroundColor = ta.getColor(R.styleable.MediaSeekBar_originBackgroundColor, originBackgroundColor);
             maxProgress = ta.getInt(R.styleable.MediaSeekBar_maxProgress, maxProgress);
-            progressWidth = ta.getDimensionPixelOffset(R.styleable.MediaSeekBar_progressWidth, progressWidth);
+            progressLineWidth = ta.getDimensionPixelOffset(R.styleable.MediaSeekBar_progressWidth, progressLineWidth);
             canClickProgress = ta.getBoolean(R.styleable.MediaSeekBar_canClickProgress, false);
 
             Drawable tempDrawable = ta.getDrawable(R.styleable.MediaSeekBar_customThumb);
             if(tempDrawable != null){
                 thumb = getBitmapFromDrawable(tempDrawable);
             }
-
             ta.recycle();
         }
     }
@@ -117,7 +117,7 @@ public class MediaSeekBar extends View {
         paint = new Paint();
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
         paint.setAntiAlias(true);
-        paint.setStrokeWidth(progressWidth);
+        paint.setStrokeWidth(progressLineWidth);
         paint.setStyle(Paint.Style.STROKE);
     }
 
@@ -156,6 +156,9 @@ public class MediaSeekBar extends View {
         if(height < PROGRESS_CLICK_RANGE * 2){
             PROGRESS_CLICK_RANGE = height / 2;
         }
+        halfThumbWidth = thumb.getWidth() * 1.0f / 2;
+        thumbPos = halfThumbWidth;
+
 
         setMeasuredDimension(width, height);
     }
@@ -198,13 +201,22 @@ public class MediaSeekBar extends View {
                 break;
 
             case MotionEvent.ACTION_MOVE:
-                if(currentTouchState == CLICK_THUMB || currentTouchState == START_DRAW_THUMB){
+                if(currentTouchState == CLICK_THUMB || currentTouchState == START_DRAG_THUMB
+                        || currentTouchState == DRAGGING_THUMB){
                     setThumbPositionByAxis(event.getX());
 
                     if(!isStartDrawThumb){
                         isStartDrawThumb = true;
-                        currentTouchState = START_DRAW_THUMB;
+                        preDragX = event.getX();
+                        currentTouchState = START_DRAG_THUMB;
                         notifyListener(translateXtoProgress(event.getX()));
+                    }else {
+                        currentTouchState = DRAGGING_THUMB;
+                        // control call onDraggingThumb's frequency
+                        if(event.getX() - preDragX > CALL_DRAGGING_FREQUENCY){
+                            preDragX = event.getX();
+                            notifyListener(translateXtoProgress(event.getX()));
+                        }
                     }
                 }
                 break;
@@ -215,12 +227,10 @@ public class MediaSeekBar extends View {
                     notifyListener(getCurrentProgress());
                 }
 
-                if(currentTouchState == START_DRAW_THUMB){
-                    if(isStartDrawThumb){
-                        isStartDrawThumb = false;
-                        currentTouchState = STOP_DRAW_THUMB;
-                        notifyListener(getCurrentProgress());
-                    }
+                if(isStartDrawThumb && currentTouchState == DRAGGING_THUMB){
+                    isStartDrawThumb = false;
+                    currentTouchState = STOP_DRAG_THUMB;
+                    notifyListener(getCurrentProgress());
                 }
 
                 if(currentTouchState == CLICK_THUMB){
@@ -247,12 +257,16 @@ public class MediaSeekBar extends View {
             listener.onProgressChange(currentProgress);
         }
 
-        if(currentTouchState == START_DRAW_THUMB){
-            listener.onStartDrawThumb(currentProgress);
+        if(currentTouchState == START_DRAG_THUMB){
+            listener.onStartDragThumb(currentProgress);
         }
 
-        if(currentTouchState == STOP_DRAW_THUMB){
-            listener.onStopDrawThumb(currentProgress);
+        if(currentTouchState == STOP_DRAG_THUMB){
+            listener.onStopDragThumb(currentProgress);
+        }
+
+        if(currentTouchState == DRAGGING_THUMB){
+            listener.onDraggingThumb(currentProgress);
         }
 
     }
@@ -260,9 +274,9 @@ public class MediaSeekBar extends View {
     private boolean isPressThumb(float x, float y) {
 
         //expand touch range of thumb
-        int left = thumbPos - thumb.getWidth();
+        float left = thumbPos - thumb.getWidth();
         int top = 0;
-        int right = thumbPos + thumb.getWidth();
+        float right = thumbPos + thumb.getWidth();
         int bottom = height;
 
         RectF thumbRect = new RectF(left,top, right, bottom);
@@ -286,16 +300,29 @@ public class MediaSeekBar extends View {
     }
 
     private void drawHasPlayProgressLine(Canvas canvas) {
-        int stopX = (int) ((currentProgress * 1.0 / maxProgress) * width);
         paint.setColor(hasPlayColor);
-        canvas.drawLine(0, 0, stopX, 0, paint);
+        canvas.drawLine(0, 0, getLineStopX(), 0, paint);
+    }
+
+    public float getLineStopX() {
+        // 0 - 100  corresponding to  halfThumbWidth -  (width - halfThumbWidth)
+        float f = (currentProgress * 1.0f / maxProgress) * (width - thumb.getWidth()) + halfThumbWidth;
+        return  f;
     }
 
 
     private void drawThumb(Canvas canvas) {
-        int  stopX = thumbPos - (thumb.getWidth() / 2);
+        float leftX = thumbPos - halfThumbWidth;
         int top =  thumb.getHeight() / 2 * -1;
-        canvas.drawBitmap(thumb, stopX, top, paint);
+
+        canvas.drawBitmap(thumb, getThumbLeft(leftX), top, paint);
+    }
+
+    public float getThumbLeft(float left){
+        if(left < 0) return 0;
+        if(left > width - thumb.getWidth()) return  width - thumb.getWidth();
+
+        return  left;
     }
 
 
@@ -319,15 +346,29 @@ public class MediaSeekBar extends View {
     }
 
     private void setThumbPositionByAxis(float x) {
-        setCurrentProgress(translateXtoProgress(x));
+            setCurrentProgress(translateXtoProgress(x));
     }
 
     private void setThumbPositionByProgress(int currentProgress) {
-        thumbPos = (int) ((currentProgress * 1.0 / maxProgress) * width);
+
+        if(currentProgress == 0){
+            thumbPos = halfThumbWidth;
+            return;
+        }
+
+        if(currentProgress == maxProgress){
+            thumbPos = width - halfThumbWidth;
+            return;
+        }
+
+        thumbPos = (float) ((currentProgress * 1.0 / maxProgress) * (width - thumb.getWidth()) + halfThumbWidth);
     }
 
     private int translateXtoProgress(float x) {
-        return (int) (maxProgress * (x / width));
+        if(x < halfThumbWidth)  return 0;
+        if(x > width - halfThumbWidth) return maxProgress;
+
+        return (int) (maxProgress * (x / width) + 0.5f);
     }
 
 
@@ -387,12 +428,12 @@ public class MediaSeekBar extends View {
     }
 
 
-
     public interface  MediaSeekBarListener{
         void onThumbClick();
-        void onStartDrawThumb(int currentProgress);
-        void onStopDrawThumb(int cureentProgress);
-        void onProgressChange(int currentProgress);
+        void onStartDragThumb(int currentProgress);
+        void onDraggingThumb(int currentProgress);
+        void onStopDragThumb(int currentProgress);
+        void onProgressChange(int currentProgress);  // call at click progress drag thumb
     }
 
 }

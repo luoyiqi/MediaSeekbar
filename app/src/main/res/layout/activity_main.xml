@@ -14,7 +14,6 @@
         android:layout_height="30dp"
         msb:progressWidth="2dp"
         msb:customThumb="@drawable/custom_seekbar_thumb"
-        msb:canClickProgress="false"
         msb:hasPlayColor="@color/has_play_color">
     </susion.com.mediaseekbar.MediaSeekBar>
 

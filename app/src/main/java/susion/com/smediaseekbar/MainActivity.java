@@ -45,12 +45,17 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onStartDrawThumb(int currentProgress) {
+            public void onStartDragThumb(int currentProgress) {
                 Toast.makeText(MainActivity.this, "thumb被开始拖拽", Toast.LENGTH_SHORT).show();
             }
 
             @Override
-            public void onStopDrawThumb(int cureentProgress) {
+            public void onDraggingThumb(int currentProgress) {
+                Toast.makeText(MainActivity.this, "thumb正在被拖拽", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onStopDragThumb(int cureentProgress) {
                 Toast.makeText(MainActivity.this, "thumb停止拖拽", Toast.LENGTH_SHORT).show();
             }
 

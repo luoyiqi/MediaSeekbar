@@ -5,16 +5,9 @@
 
     <solid android:color="#ffffff" />
 
-    <stroke
-        android:width="6dp"
-        android:color="@color/thumb_out" />
 
 
-    <padding
-    android:left="@dimen/media_player_progressbar_padding"
-    android:right="@dimen/media_player_progressbar_padding"
-    android:top="@dimen/media_player_progressbar_padding"
-    android:bottom="@dimen/media_player_progressbar_padding"/>
+
 
 
 
