@@ -109,6 +109,7 @@ public class MediaSeekBar extends View {
             if(tempDrawable != null){
                 thumb = getBitmapFromDrawable(tempDrawable);
             }
+
             ta.recycle();
         }
     }

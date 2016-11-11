@@ -1,21 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:msb="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
 
     <susion.com.mediaseekbar.MediaSeekBar
-        android:id="@+id/msb"
-        android:layout_centerInParent="true"
+        android:layout_marginTop="30dp"
+        android:id="@+id/msb1"
+        android:layout_gravity="center_horizontal"
+        android:layout_width="200dp"
+        android:layout_height="30dp"
+        msb:canClickProgress="true"
+        msb:maxProgress="100"
+        msb:originBackgroundColor="@color/origin_background_color"
+        msb:hasBufferColor="@color/has_buffer_color"
+        msb:progressWidth="2dp"
+        msb:customThumb="@drawable/custom_seekbar_thumb"
+        msb:hasPlayColor="#000000">
+    </susion.com.mediaseekbar.MediaSeekBar>
+
+
+    <susion.com.mediaseekbar.MediaSeekBar
+        android:layout_marginTop="30dp"
+        android:id="@+id/msb2"
+        android:layout_gravity="center_horizontal"
+        android:layout_width="200dp"
+        android:layout_height="30dp"
+        msb:progressWidth="4dp"
+        msb:customThumb="@drawable/custom_seekbar_thumb2"
+        msb:hasBufferColor="@color/has_play_color"
+        msb:hasPlayColor="@color/colorPrimary">
+    </susion.com.mediaseekbar.MediaSeekBar>
+
+
+    <susion.com.mediaseekbar.MediaSeekBar
+        android:layout_marginTop="30dp"
+        android:id="@+id/msb3"
+        android:layout_gravity="center_horizontal"
         android:layout_width="200dp"
         android:layout_height="30dp"
         msb:progressWidth="2dp"
-        msb:customThumb="@drawable/custom_seekbar_thumb"
+        msb:customThumb="@drawable/custom_seekbar_thumb3"
         msb:hasPlayColor="@color/has_play_color">
     </susion.com.mediaseekbar.MediaSeekBar>
 
 
-</RelativeLayout>
+    <susion.com.mediaseekbar.MediaSeekBar
+        android:layout_marginTop="30dp"
+        android:id="@+id/msb4"
+        android:layout_gravity="center_horizontal"
+        android:layout_width="200dp"
+        android:layout_height="30dp"
+        msb:progressWidth="2dp"
+        msb:customThumb="@drawable/ic_launcher"
+        msb:hasBufferColor="@color/colorPrimaryDark"
+        msb:hasPlayColor="@color/white">
+    </susion.com.mediaseekbar.MediaSeekBar>
+
+
+</LinearLayout>
