@@ -54,7 +54,7 @@ public class MediaSeekBar extends View {
     private static final int STOP_DRAG_THUMB = 5;
     private static final int CLICK_PROGRESS = 6;
     private boolean isStartDrawThumb = false;
-    private int PROGRESS_CLICK_RANGE = 10;
+    private int PROGRESS_CLICK_RANGE = 15;
     private boolean canClickProgress = false;
 
 
@@ -103,7 +103,7 @@ public class MediaSeekBar extends View {
             originBackgroundColor = ta.getColor(R.styleable.MediaSeekBar_originBackgroundColor, originBackgroundColor);
             maxProgress = ta.getInt(R.styleable.MediaSeekBar_maxProgress, maxProgress);
             progressLineWidth = ta.getDimensionPixelOffset(R.styleable.MediaSeekBar_progressWidth, progressLineWidth);
-            canClickProgress = ta.getBoolean(R.styleable.MediaSeekBar_canClickProgress, false);
+            canClickProgress = ta.getBoolean(R.styleable.MediaSeekBar_canClickProgress, true);
 
             Drawable tempDrawable = ta.getDrawable(R.styleable.MediaSeekBar_customThumb);
             if(tempDrawable != null){
