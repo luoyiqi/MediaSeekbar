@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="MediaSeekBar">
+        <attr name="hasPlayColor" format="color|reference"/>
+        
+        <attr name="originBackgroundColor" format="color|reference"/>
+
+        <attr name="hasBufferColor" format="color|reference"/>
+
+        <attr name="maxProgress" format="integer|reference"/>
+
+        <attr name="progressWidth" format="dimension|reference"/>
+
+        <attr name="customThumb"  format="reference"/>
+
+    </declare-styleable>
+
+</resources>
