@@ -54,6 +54,7 @@ public class MediaSeekBar extends View {
     private static final int CLICK_PROGRESS = 5;
     private boolean isStartDrawThumb = false;
     private int PROGRESS_CLICK_RANGE = 10;
+    private boolean canClickProgress = false;
 
 
 
@@ -101,6 +102,7 @@ public class MediaSeekBar extends View {
             originBackgroundColor = ta.getColor(R.styleable.MediaSeekBar_originBackgroundColor, originBackgroundColor);
             maxProgress = ta.getInt(R.styleable.MediaSeekBar_maxProgress, maxProgress);
             progressWidth = ta.getDimensionPixelOffset(R.styleable.MediaSeekBar_progressWidth, progressWidth);
+            canClickProgress = ta.getBoolean(R.styleable.MediaSeekBar_canClickProgress, false);
 
             Drawable tempDrawable = ta.getDrawable(R.styleable.MediaSeekBar_customThumb);
             if(tempDrawable != null){
@@ -186,9 +188,11 @@ public class MediaSeekBar extends View {
                     currentTouchState = CLICK_THUMB;
                 }
 
-                if(isClickProgress(x, y)){
-                    currentTouchState = CLICK_PROGRESS;
-                    setCurrentProgress(translateXtoProgress(x));
+                if(canClickProgress){
+                    if(isClickProgress(x, y)){
+                        currentTouchState = CLICK_PROGRESS;
+                        setCurrentProgress(translateXtoProgress(x));
+                    }
                 }
 
                 break;
@@ -352,6 +356,14 @@ public class MediaSeekBar extends View {
         return hasBufferProgress;
     }
 
+    public boolean isCanClickProgress() {
+        return canClickProgress;
+    }
+
+    public void setCanClickProgress(boolean canClickProgress) {
+        this.canClickProgress = canClickProgress;
+    }
+
     public  Bitmap getBitmapFromDrawable(Drawable drawable) {
         Bitmap bitmap;
 
@@ -373,6 +385,7 @@ public class MediaSeekBar extends View {
         drawable.draw(canvas);
         return bitmap;
     }
+
 
 
     public interface  MediaSeekBarListener{
