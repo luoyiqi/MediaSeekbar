@@ -1,12 +1,6 @@
 ### MediaSeekBar
 
-
-
-![./seekbar.gif](./seekbar.gif)
-
-
-
-
+![](http://7xrbxa.com1.z0.glb.clouddn.com/git_gifseekbar.gif)
 
 > - 一个用于媒体播放器进度条的seekbar。
 > - 内部进度条分为3种： 背景进度条， 缓冲进度条， 已播放进度条。
